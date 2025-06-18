@@ -22,6 +22,8 @@
       color: white;
       max-width: 500px;
       margin: auto;
+      background-image: url("./g2.gif");
+      background-size: 400px 500px;
     }
 
     h1 {
@@ -31,6 +33,7 @@
     #controls {
       text-align: center;
       margin-bottom: 20px;
+      
     }
 
     button,
@@ -57,6 +60,8 @@
       text-align: center;
       flex: 1;
       margin: 10px;
+      background-image: url("./g1.gif");
+      background-size: auto;
     }
 
     .emoji {
@@ -110,6 +115,9 @@
     .Couleurville{
         color: #000000;
     }
+    .img_1 {
+        width: 30px;
+    }
   </style>
 </head>
 
@@ -120,7 +128,9 @@
     </center>
   </div>
   <div id="controls">
+      <img class="img_1" src="./g3.gif" alt="gif pluie">
     <button class="maposition" onclick="chercherParPosition()">📍 Ma position actuelle</button>
+    <img class="img_1" src="./g3.gif" alt="gif pluie">
     <input type="text" id="ville" placeholder="Entrez une ville">
     <button class="search" onclick="chercherParVille()">Rechercher</button>
   </div>
