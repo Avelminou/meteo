@@ -1,85 +1,571 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Application météo simple</title>
-  <meta name="description" content="Consultez la météo actuelle de votre ville avec cette application météo simple, rapide et gratuite." />
-  <meta name="keywords" content="météo, météo gratuite, prévisions météo, météo ville" />
-  <meta name="author" content="Avelminou" />
-
-  <!-- Icône de l’onglet -->
-  <link rel="icon" href="favicon.png" type="image/png" />
-
-  <!-- Réseaux sociaux -->
-  <meta property="og:title" content="Application météo simple" />
-  <meta property="og:description" content="Affichez la météo de votre ville en temps réel." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://avelminou.github.io/meteo/" />
-</head>
-<body>
-   <h1>Météo en temps réel par ville</h1>
-  <p>Entrez une ville pour connaître la température, la météo actuelle et les prévisions.</p>
-  
-  <input type="text" id="ville" placeholder="Entrez une ville" />
-  <button onclick="chercherPrevision()">Rechercher</button>
-  
-  <div id="resultat"></div>
-
-  <script>
-    async function chercherPrevision() {
-    const ville = document.getElementById('ville').value;
-    const apiKey = "85b494c5f127df88c974bf66f7c4c67f"; // ← remplace par ta clé API
-    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${ville}&units=metric&lang=fr&appid=${apiKey}`;
-
-    try {
-      const reponse = await fetch(url);
-      if (!reponse.ok) throw new Error("Ville introuvable");
-
-      const data = await reponse.json();
-
-      // Filtrer une prévision par jour (autour de 12h)
-      const previsionsParJour = [];
-      const dejaAjoutes = new Set();
-
-      for (let point of data.list) {
-        const date = new Date(point.dt_txt);
-        const heure = date.getHours();
-
-        // On prend 12h ou 13h
-        if ((heure === 12 || heure === 13) && !dejaAjoutes.has(date.toDateString())) {
-          dejaAjoutes.add(date.toDateString());
-          previsionsParJour.push(point);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstridWeather</title>
+    <link rel="icon" href="favicon.png" type="image/png" />
+    <style>
+        .allo {
+            height: 10px;
         }
-      }
 
-      // Générer HTML
-      let html = `<h2>Prévisions 5 jours pour ${data.city.name}</h2>`;
-      html += `<div style="display:flex; gap:15px;">`;
+        body {
+            background-color: #ffffff;
+            max-width: 500px;
+            margin: auto;
+            font-size: 80%;
+        }
+        .main {
+            top: 0;
+            background-color: rgb(83, 183, 190);
+            padding-bottom: 20px;
+        }
 
-      previsionsParJour.forEach(prevision => {
-        const date = new Date(prevision.dt_txt);
-        const icone = prevision.weather[0].icon;
-        const iconeURL = `https://openweathermap.org/img/wn/${icone}@2x.png`;
-        html += `
-          <div style="border:1px solid #ccc; border-radius:10px; padding:10px; text-align:center;">
+        .mapleft {
+            height: auto;
+            width: 45%;
+            background-color: transparent;
+            margin-left: 5%;
+        }
+
+        .mapright {
+            height: auto;
+            width: 45%;
+            background-color: transparent;
+            margin-left: 5%;
+        }
+
+        .tete {
+            width: 100%;
+            height: 140px;
+            background-image: url("./mina5.jpg");
+            background-size: 400px 140px;
+            display: flex;
+            color: white;
+            font-weight: bold;
+            border-bottom: solid 1px white;
+        }
+
+        .left {
+            height: 140px;
+            width: 45%;
+            background-color: transparent;
+            margin-left: 5%;
+
+            border-color: #86b3b3;
+        }
+
+        .right {
+            height: 140px;
+            width: 45%;
+            background-color: transparent;
+            text-align: right;
+        }
+
+        .a {
+            float: right;
+
+        }
+
+        .b {
+            float: right;
+        }
+
+        .c {
+            float: right;
+        }
+
+        .semaine {
+            height: 250px;
+            width: 100%;
+        }
+
+        .andro {
+            height: 250px;
+            max-width: 500px;
+            background-color: #3b29a4;
+            color: white;
+            border-bottom: solid 1px white;
+            padding-bottom: 20px;
+        }
+
+        strong {
+            border-bottom: solid 1px white;
+        }
+
+        verte {
+            color: #51ff2b;
+        }
+
+        rouge {
+            color: #ff7300;
+        }
+
+        jaune {
+            color: #fff100;
+        }
+
+        .protjour {
+            width: 90%;
+            height: 100px;
+
+            display: flex;
+        }
+
+        .tjour {
+            width: 33%;
+            height: 100px;
+        }
+
+        .emoji {
+            font-size: 27px;
+        }
+
+        .locale {
+            font-weight: bold;
+            font-size: 20px;
+            color: #ff9d00;
+        }
+
+        .empl {
+            color: white;
+            margin-left: 60px;
+            margin-top: 2px;
+            font-size: 18px;
+        }
+
+        .choix {
+            border: none;
+            border-radius: 3px;
+            margin-left: 130px;
+        }
+
+        .choix:active {
+            background-color: #31ff15aa;
+        }
+
+        .date {
+            margin-top: 2px;
+            position: absolute;
+            margin-left: 200px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            background-color: #0000008e;
+        }
+
+        .pole {
+            background-color: #55d5ff;
+            background-image: url("./weather.png");
+            background-size: 130px;
+            background-repeat: no-repeat;
+            width: 100%;
+            height: 65px;
+            z-index: 1;
+            border-bottom: solid 1px white;
+        }
+
+        .footer {
+            height: 110px;
+            color: white;
+            background-color: #0e005d;
+
+        }
+
+        .vide {
+            height: 65px;
+        }
+
+        .map {
+            background-color: #55d5ff;
+            width: 100%;
+            height: auto;
+            display: flex;
+        }
+
+        blanc {
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="pole">
+        <b class="empl">📍Emplacement par défaut: <rouge>Fianarantsoa</rouge> 🇲🇬</b><br><br>
+        <button class="choix"> <a href="#"> Choisir votre emplacement ici 🔍</a></button><br><br>
+    </div>
+    <div class="tete">
+        <div class="left">
+            <button class="date">
+                <verte>Aujourd'hui</verte>
+            </button>
+            <strong>Emplacement: </strong>
+            <p class="locale">Fianarantsoa📍</p>
+            <p>Haute_Matsiatra 🔮</p>
+            <p>Madagascar 🇲🇬</p>
+        </div>
+        <div class="right">
+            <p>
+                <k class="emoji">🌤️</k>
+                Ensoleillé<br>
+            </p>
+            <p>🌡️<verte>8</verte>°C - <rouge>20</rouge>°C </p>
+            <p>💨15.7km/h. Sud-Est </p>
+            <p>❄️Risque de grêle: <verte>0</verte>%</p>
+        </div>
+    </div>
+
+    <!-- Lundi -->
+    <div class="andro"><br>
+        <center><strong>Mercredi 12 Mars 2025</strong>
+            <br>
+            <br>💨 Vent: 17.8km/h.↖️Sud-Est
+            <br>🌡️Température: <verte>17</verte>°C - <rouge>28</rouge>°C
+            <br>⛱️Précipitation: <jaune>0.7</jaune>mm
+            <br>💧Humidité: <jaune>78</jaune>%
+            <br>☔Sensibilité de pluie: <jaune>99</jaune>%
+            <br><br>
+            <div class="protjour">
+                <div class="tjour">
+                    <strong>Matin:</strong><br>
+                    <k class="emoji">🌤️</k><br>
+                    Ensoleillé<br>
+                    🌡️temp: <verte>17</verte>°C<br>
+                    💨9km/h. N-E<br>
+                    🌪️Rafal: 12km/h
+                </div>
+                <div class="tjour">
+                    <strong>Après-midi:</strong><br>
+                    <k class="emoji">⛈️</k><br>
+                    Orage<br>
+                    🌡️temp: <rouge>28</rouge>°C<br>
+                    💨15.7km/h. S-E<br>
+                    🌪️Rafal: 22km/h
+                </div>
+                <div class="tjour">
+                    <strong>Nuit:</strong><br>
+                    <k class="emoji">☁️</k><br>
+                    Nuageuse<br>
+                    🌡️temp: <verte>23</verte>°C<br>
+                    💨10.8km/h. E<br>
+                    🌪️Rafal: 17km/h
+                </div>
+            </div>
+
+        </center>
+    </div>
+
+    <!-- Mardi -->
+    <div class="andro"><br>
+        <center><strong>Jeudi 13 Mars 2025</strong>
+            <br>
+            <br>💨 Vent: 12km/h.↙️Nord-Est
+            <br>🌡️Température: <verte>19</verte>°C - <rouge>26</rouge>°C
+            <br>⛱️Précipitation: <jaune>2.7</jaune>mm
+            <br>💧Humidité: <jaune>98</jaune>%
+            <br>☔Sensibilité de pluie: <jaune>100</jaune>%
+            <br><br>
+            <div class="protjour">
+                <div class="tjour">
+                    <strong>Matin:</strong><br>
+                    <k class="emoji">🌥️</k><br>
+                    Nuageux<br>
+                    🌡️temp: <verte>19</verte>°C<br>
+                    💨5km/h. S-E<br>
+                    🌪️Rafal: 7km/h
+                </div>
+                <div class="tjour">
+                    <strong>Après-midi:</strong><br>
+                    <k class="emoji">⛈️</k><br>
+                    Orage<br>
+                    🌡️temp: <rouge>26</rouge>°C<br>
+                    💨10.5km/h. N-E<br>
+                    🌪️Rafal: 21km/h
+                </div>
+                <div class="tjour">
+                    <strong>Nuit:</strong><br>
+                    <k class="emoji">☁️</k><br>
+                    Nuageuse<br>
+                    🌡️temp: <verte>22</verte>°C<br>
+                    💨8km/h. N<br>
+                    🌪️Rafal: 14km/h
+                </div>
+            </div>
+
+        </center>
+    </div>
+
+    <!-- Vendredi -->
+    <div class="andro"><br>
+        <center><strong>Vendredi 14 Mars 2025</strong>
+            <br>
+            <br>💨 Vent: 22km/h.↘️Nord-Ouest
+            <br>🌡️Température: <verte>20</verte>°C - <rouge>24</rouge>°C
+            <br>⛱️Précipitation: <jaune>17.9</jaune>mm
+            <br>💧Humidité: <jaune>100%</jaune>%
+            <br>☔Sensibilité de pluie: <jaune>100%</jaune>%
+            <br><br>
+            <div class="protjour">
+                <div class="tjour">
+                    <strong>Matin:</strong><br>
+                    <k class="emoji">☁️</k><br>
+                    Nuageux<br>
+                    🌡️temp: <verte>20</verte>°C<br>
+                    💨17km/h. N-O<br>
+                    🌪️Rafal: 29km/h
+                </div>
+                <div class="tjour">
+                    <strong>Après-midi:</strong><br>
+                    <k class="emoji">🌧️</k><br>
+                    Pluie<br>
+                    🌡️temp: <rouge>24</rouge>°C<br>
+                    💨20km/h. N-O<br>
+                    🌪️Rafal: 33km/h
+                </div>
+                <div class="tjour">
+                    <strong>Nuit:</strong><br>
+                    <k class="emoji">🌧️</k><br>
+                    Pluie<br>
+                    🌡️temp: <verte>21</verte>°C<br>
+                    💨34.7km/h. O<br>
+                    🌪️Rafal: 55km/h
+                </div>
+            </div>
+
+        </center>
+    </div>
+
+    <!-- Samedi -->
+    <div class="andro"><br>
+        <center><strong>Samedi 15 Mars 2025</strong>
+            <br>
+            <br>💨 Vent: 44.5km/h.↗️Sud-Ouest
+            <br>🌡️Température: <verte>17</verte>°C - <rouge>25</rouge>°C
+            <br>⛱️Précipitation: <jaune>11</jaune>mm
+            <br>💧Humidité: <jaune>90</jaune>%
+            <br>☔Sensibilité de pluie: <jaune>95</jaune>%
+            <br><br>
+            <div class="protjour">
+                <div class="tjour">
+                    <strong>Matin:</strong><br>
+                    <k class="emoji">🌧️</k><br>
+                    Pluie<br>
+                    🌡️temp: <verte>17</verte>°C<br>
+                    💨44.5km/h. S-O<br>
+                    🌪️Rafal: 68km/h
+                </div>
+                <div class="tjour">
+                    <strong>Après-midi:</strong><br>
+                    <k class="emoji">🌦️</k><br>
+                    Pluie<br>
+                    🌡️temp: <rouge>28</rouge>°C<br>
+                    💨30km/h. S<br>
+                    🌪️Rafal: 48km/h
+                </div>
+                <div class="tjour">
+                    <strong>Nuit:</strong><br>
+                    <k class="emoji">🌙</k><br>
+                    Claire<br>
+                    🌡️temp: <verte>23</verte>°C<br>
+                    💨18km/h. S-E<br>
+                    🌪️Rafal: 31km/h
+                </div>
+            </div>
+
+        </center>
+    </div>
+
+    <!-- Dimanche -->
+    <div class="andro"><br>
+        <center><strong>Dimanche 16 Mars 2025</strong>
+            <br>
+            <br>💨 Vent: 8km/h.↖️Sud-Est
+            <br>🌡️Température: <verte>16</verte>°C - <rouge>29</rouge>°C
+            <br>⛱️Précipitation: <jaune>0</jaune>mm
+            <br>💧Humidité: <jaune>50</jaune>%
+            <br>☔Sensibilité de pluie: <jaune>43</jaune>%
+            <br><br>
+            <div class="protjour">
+                <div class="tjour">
+                    <strong>Matin:</strong><br>
+                    <k class="emoji">🌞</k><br>
+                    Ensoleillé<br>
+                    🌡️temp: <verte>16</verte>°C<br>
+                    💨9km/h. E<br>
+                    🌪️Rafal: 13km/h
+                </div>
+                <div class="tjour">
+                    <strong>Après-midi:</strong><br>
+                    <k class="emoji">🌤️</k><br>
+                    Ensoleillé<br>
+                    🌡️temp: <rouge>29</rouge>°C<br>
+                    💨15km/h. S-E<br>
+                    🌪️Rafal: 26km/h
+                </div>
+                <div class="tjour">
+                    <strong>Nuit:</strong><br>
+                    <k class="emoji">🌙</k><br>
+                    Claire<br>
+                    🌡️temp: <verte>20</verte>°C<br>
+                    💨5km/h. E<br>
+                    🌪️Rafal: 11km/h
+                </div>
+            </div>
+
+        </center>
+    </div>
+
+    <div class="map">
+        <div class="mapleft">
+            <a href="#">📍Miarinavaratra</a><br>
+            <a href="#">📍Fandriana</a><br>
+            <a href="#">📍Antanifotsy</a><br>
+            <a href="#">📍Farafangana</a><br>
+            <a href="#">📍Morondava</a><br>
+            <a href="#">📍Antsirabe</a><br>
+            <a href="#">📍Vangaindrano</a><br>
+            <a href="#">📍Ambohimahasoa</a><br>
+            <a href="#">📍Ambositra</a><br>
+            <a href="#">📍Tananarivo</a><br>
+            <a href="#">📍Ranomafana</a><br>
+            <a href="#">📍Soavinandriana</a><br>
+            <a href="#">📍Ambalavao</a><br>
+            <a href="#">📍Toamasina</a><br>
+            <a href="#">📍Sambava</a><br>
+            <a href="#">📍Antalaha</a><br>
+            <a href="#">📍Mahajanga</a><br>
+            <a href="#">📍Ambilobe</a><br>
+            <a href="#">📍Maintirano</a><br>
+            <a href="#">📍Ihosy</a><br>
+            <a href="#">📍Ambovombe Androy</a><br>
+            <a href="#">📍Fort-Daufin</a><br>
+            <a href="#">📍Vohipeno</a><br>
+            <a href="#">📍Ikalamavony</a><br>
+            <a href="#">📍Ambatofinadrahana</a><br>
+            <a href="#">📍Marolambo</a><br>
+            <a href="#">📍Ambatondrazaka</a><br>
+            <a href="#">📍Antsalova</a><br>
+            <a href="#">📍Sakaraha</a><br>
+            <a href="#">📍Maevatanana</a><br>
+        </div>
+        <div class="mapright">
+            <a href="#">📍Diego-Suarez</a><br>
+            <a href="#">📍Nosy Be</a><br>
+            <a href="#">📍Amparafaravola</a><br>
+            <a href="#">📍Mangoky</a><br>
+            <a href="#">📍Betafo</a><br>
+            <a href="#">📍Manakara</a><br>
+            <a href="#">📍Manadriana</a><br>
+            <a href="#">📍Vohemar</a><br>
+            <a href="#">📍Manajary</a><br>
+            <a href="#">📍Faratsiho</a><br>
+            <a href="#">📍Toliara</a><br>
+            <a href="#">📍Mandoto</a><br>
+            <a href="#">📍Ampatolampy</a><br>
+            <a href="#">📍Anjojorobe</a><br>
+            <a href="#">📍Befotaka</a><br>
+            <a href="#">📍Andapa</a><br>
+            <a href="#">📍Fenoarivobe</a><br>
+            <a href="#">📍Tsiroanomandidy</a><br>
+            <a href="#">📍Manjakandriana</a><br>
+            <a href="#">📍Ankazobe</a><br>
+            <a href="#">📍Vondrozo</a><br>
+            <a href="#">📍Ikongo</a><br>
+            <a href="#">📍Isandra</a><br>
+            <a href="#">📍Lalangina</a><br>
+            <a href="#">📍Vohibato</a><br>
+            <a href="#">📍Iakora</a><br>
+            <a href="#">📍Ivohibe</a><br>
+            <a href="#">📍Ifanadiana</a><br>
+            <a href="#">📍Nosy Varika</a><br>
+            <a href="#">📍Taolagnaro</a><br>
+        </div>
+    </div>
+
+
+
+    <div class="main">
+        <h1>Météo en temps réel par ville</h1>
+        <p>Entrez une ville pour connaître la température, la météo actuelle et les prévisions.</p>
+
+        <input type="text" id="ville" placeholder="Entrez une ville" />
+        <button onclick="chercherPrevision()">Rechercher</button>
+
+        <div id="resultat"></div>
+    </div>
+    <script>
+        async function chercherPrevision() {
+            const ville = document.getElementById('ville').value;
+            const apiKey = "85b494c5f127df88c974bf66f7c4c67f"; // ← remplace par ta clé API
+            const url = `https://api.openweathermap.org/data/2.5/forecast?q=${ville}&units=metric&lang=fr&appid=${apiKey}`;
+
+            try {
+                const reponse = await fetch(url);
+                if (!reponse.ok) throw new Error("Ville introuvable");
+
+                const data = await reponse.json();
+
+                // Filtrer une prévision par jour (autour de 12h)
+                const previsionsParJour = [];
+                const dejaAjoutes = new Set();
+
+                for (let point of data.list) {
+                    const date = new Date(point.dt_txt);
+                    const heure = date.getHours();
+
+                    // On prend 12h ou 13h
+                    if ((heure === 12 || heure === 13) && !dejaAjoutes.has(date.toDateString())) {
+                        dejaAjoutes.add(date.toDateString());
+                        previsionsParJour.push(point);
+                    }
+                }
+
+                // Générer HTML
+                let html = `<h2>Prévisions 5 jours pour ${data.city.name}</h2>`;
+                html += `<div style="display:flex; gap:15px;">`;
+
+                previsionsParJour.forEach(prevision => {
+                    const date = new Date(prevision.dt_txt);
+                    const icone = prevision.weather[0].icon;
+                    const iconeURL = `https://openweathermap.org/img/wn/${icone}@2x.png`;
+                    html += `
+          <div style="border:1px solid #ccc; border-radius:10px; padding:10px; text-align:center; margin:auto; max-width: 500px">
             <p><strong>${date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' })}</strong></p>
             <img src="${iconeURL}" alt="${prevision.weather[0].description}" />
             <p>${prevision.main.temp.toFixed(1)}°C</p>
             <p>${prevision.weather[0].description}</p>
+            <br>
           </div>
         `;
-      });
+                });
 
-      html += `</div>`;
-      document.getElementById('resultat').innerHTML = html;
+                html += `</div>`;
+                document.getElementById('resultat').innerHTML = html;
 
-    } catch (erreur) {
-      document.getElementById('resultat').innerHTML = `<p style="color:red;">Erreur : ${erreur.message}</p>`;
-    }
-  }
+            } catch (erreur) {
+                document.getElementById('resultat').innerHTML = `<p style="color:red;">Erreur : ${erreur.message}</p>`;
+            }
+        }
 
-  </script>
+    </script>
+    <br><br>
+    <div class="footer">
+        <center>
+            <br>
+            <section>Facebook :<a href="https://www.facebook.com/profile.php?id=100073603567696"> Avel Mimilitia</a>
+            </section>
+            <br>
+            <section>☎️ :<a>: +261337646412</a></section>
+            <br>
+            <section>E-mail :<a
+                    href="https://mail.google.com/mail/x/-hp-opera-mini/mylainemimifi@gmail.com">avelmimilitia@gmail.com</a>
+            </section>
+        </center>
+        <center>Digital © 2025</center>
+    </div>
+
 </body>
+
 </html>
