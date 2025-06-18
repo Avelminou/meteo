@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
+   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   
-  <title>App Météo</title>
+
+  <title>Application météo simple</title>
+  <meta name="description" content="Consultez la météo actuelle de votre ville avec cette application météo simple, rapide et gratuite." />
+  <meta name="keywords" content="météo, météo gratuite, prévisions météo, météo ville" />
+  <meta name="author" content="Avelminou" />
+
+  <!-- Icône de l’onglet -->
+  <link rel="icon" href="favicon.png" type="image/png" />
+
+  <!-- Réseaux sociaux -->
+  <meta property="og:title" content="Application météo simple" />
+  <meta property="og:description" content="Affichez la météo de votre ville en temps réel." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://avelminou.github.io/meteo/" />
 </head>
 <body>
-  <h1>🌦️ Test App Météo</h1>
+   <h1>Météo en temps réel par ville</h1>
+  <p>Entrez une ville pour connaître la température, la météo actuelle et les prévisions.</p>
   
   <input type="text" id="ville" placeholder="Entrez une ville" />
   <button onclick="chercherPrevision()">Rechercher</button>
